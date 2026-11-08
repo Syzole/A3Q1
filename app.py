@@ -51,9 +51,28 @@ def addStudent(first_name, last_name, email, enrollment_date):  #insert a new st
     finally:
         conn.close()
 
+def updateStudentEmail(student_id, new_email): #update the email for the student with the given student_id
+    conn = connect_to_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE students SET email = %s WHERE student_id = %s;",
+                (new_email, student_id),
+            )
+            if cur.rowcount == 0:
+                print(f"No student found with ID {student_id}")
+            else:
+                conn.commit()
+                print(f"Updated email for student {student_id} to {new_email}")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating email: {e}")
+    finally:
+        conn.close()
+
 
 
 #here is where I test stuff
-addStudent("John", "Doe", "john2.doe@example.com", "2023-09-01")
-
+#addStudent("John", "Doe", "john2.doe@example.com", "2023-09-01")
+updateStudentEmail(1, "bob.doe@example.com")
 getAllStudents()
