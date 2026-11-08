@@ -30,8 +30,30 @@ def getAllStudents(): #get all students from the database
     finally:
         conn.close()
 
+def addStudent(first_name, last_name, email, enrollment_date):  #insert a new student into the students table
+    conn = connect_to_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO students (first_name, last_name, email, enrollment_date)
+                VALUES (%s, %s, %s, %s)
+                RETURNING student_id;
+                """,
+                (first_name, last_name, email, enrollment_date),
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            print(f"Added student with ID {new_id}: {first_name} {last_name}")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding student: {e}")
+    finally:
+        conn.close()
+
 
 
 #here is where I test stuff
+addStudent("John", "Doe", "john2.doe@example.com", "2023-09-01")
 
 getAllStudents()
