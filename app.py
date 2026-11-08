@@ -70,9 +70,27 @@ def updateStudentEmail(student_id, new_email): #update the email for the student
     finally:
         conn.close()
 
-
+def deleteStudent(student_id): #delete the student with the given student_id
+    conn = connect_to_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM students WHERE student_id = %s;",
+                (student_id,),
+            )
+            if cur.rowcount == 0:
+                print(f"No student found with ID {student_id}")
+            else:
+                conn.commit()
+                print(f"Deleted student with ID {student_id}")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting student: {e}")
+    finally:
+        conn.close()
 
 #here is where I test stuff
 #addStudent("John", "Doe", "john2.doe@example.com", "2023-09-01")
-updateStudentEmail(1, "bob.doe@example.com")
+# updateStudentEmail(1, "bob.doe@example.com")
+deleteStudent(5)
 getAllStudents()
