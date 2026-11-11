@@ -1,5 +1,4 @@
 import psycopg2
-from psycopg2 import sql
 
 #DB details will live here
 DB_CONFIG = {
@@ -15,9 +14,12 @@ def connect_to_db(): #connect to the db and return a connection object
         return psycopg2.connect(**DB_CONFIG)
     except psycopg2.Error as e:
         print(f"Error connecting to the database: {e}")
+        return None
 
 def getAllStudents(): #get all students from the database
     conn = connect_to_db()
+    if conn is None:
+        return
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT student_id, first_name, last_name, email, enrollment_date FROM students ORDER BY student_id;")
@@ -32,6 +34,8 @@ def getAllStudents(): #get all students from the database
 
 def addStudent(first_name, last_name, email, enrollment_date):  #insert a new student into the students table
     conn = connect_to_db()
+    if conn is None:
+        return
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -53,6 +57,8 @@ def addStudent(first_name, last_name, email, enrollment_date):  #insert a new st
 
 def updateStudentEmail(student_id, new_email): #update the email for the student with the given student_id
     conn = connect_to_db()
+    if conn is None:
+        return
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -72,6 +78,8 @@ def updateStudentEmail(student_id, new_email): #update the email for the student
 
 def deleteStudent(student_id): #delete the student with the given student_id
     conn = connect_to_db()
+    if conn is None:
+        return
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -89,8 +97,52 @@ def deleteStudent(student_id): #delete the student with the given student_id
     finally:
         conn.close()
 
-#here is where I test stuff
-#addStudent("John", "Doe", "john2.doe@example.com", "2023-09-01")
-# updateStudentEmail(1, "bob.doe@example.com")
-deleteStudent(5)
-getAllStudents()
+def print_menu():
+    print("\n===== Student Management =====")
+    print("1. Get all students")
+    print("2. Add a student")
+    print("3. Update a student's email")
+    print("4. Delete a student")
+    print("5. Exit")
+
+def main():
+    while True:
+        print_menu()
+        choice = input("Enter choice (1-5): ").strip()
+
+        if choice == "1":
+            getAllStudents()
+
+        elif choice == "2":
+            first_name = input("First name: ").strip()
+            last_name = input("Last name: ").strip()
+            email = input("Email: ").strip()
+            enrollment_date = input("Enrollment date (YYYY-MM-DD): ").strip()
+            addStudent(first_name, last_name, email, enrollment_date)
+
+        elif choice == "3":
+            try:
+                student_id = int(input("Student ID: ").strip())
+            except ValueError:
+                print("Student ID must be a number.")
+                continue
+            new_email = input("New email: ").strip()
+            updateStudentEmail(student_id, new_email)
+
+        elif choice == "4":
+            try:
+                student_id = int(input("Student ID: ").strip())
+            except ValueError:
+                print("Student ID must be a number.")
+                continue
+            deleteStudent(student_id)
+
+        elif choice == "5":
+            print("Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter 1-5.")
+
+if __name__ == "__main__":
+    main()
